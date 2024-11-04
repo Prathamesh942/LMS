@@ -1,1 +1,1 @@
-export const DB_NAME = "threads ";
+export const DB_NAME = "LMS ";
