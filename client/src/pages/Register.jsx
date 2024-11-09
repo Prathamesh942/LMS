@@ -1,11 +1,18 @@
+import axios from "axios";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
-const Register = () => {
+const Register = ({ role }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
+    role,
   });
+
+  console.log(error);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -14,17 +21,31 @@ const Register = () => {
       [name]: value,
     });
   };
+  console.log(role);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle registration logic here (e.g., API request)
-    console.log("Register form submitted", formData);
+    try {
+      setError("");
+      setLoading(true);
+      const res = await axios.post("/api/v1/auth/register", formData);
+      setLoading(false);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      setError(error.response.data.message);
+    }
   };
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-50 ">
       <div>
-        <img src="learn.png" alt="" />
+        {role == "user" ? (
+          <img src="/learn.png" alt="" />
+        ) : (
+          <img src="/teach.png" alt="" />
+        )}
       </div>
       <div className="w-full max-w-md bg-white p-8 rounded-lg ">
         <h2 className="text-3xl font-semibold text-center mb-8">
@@ -89,14 +110,12 @@ const Register = () => {
             type="submit"
             className="w-full py-3 bg-[#6D56C8] text-white font-medium rounded-md hover:bg-purple-700 transition duration-300"
           >
-            Sign up
+            {loading ? "spinning wheel" : "Sign up"}
           </button>
+          {error.length > 0 && <span>{error}</span>}
         </form>
         <p className="mt-6 text-center text-sm text-gray-500">
-          Already have an account?{" "}
-          <a href="/login" className="text-purple-600 hover:underline">
-            Log in
-          </a>
+          Already have an account? <Link to={`/login/${role}`}>Log in</Link>
         </p>
       </div>
     </div>

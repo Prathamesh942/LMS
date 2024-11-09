@@ -1,6 +1,13 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useContext, useState } from "react";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../context/authContext";
 
-const Login = () => {
+const Login = ({ role = "user" }) => {
+  const { auth, login, logout } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -14,16 +21,30 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here (e.g., API request)
-    console.log("Login form submitted", formData);
+    try {
+      setError("");
+      setLoading(true);
+      const res = await axios.post("/api/v1/auth/login", formData);
+      login({ accessToken: res.data.accessToken, user: formData.email });
+      setLoading(false);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      setError(error.response.data.message);
+    }
   };
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-50">
       <div>
-        <img src="learn.png" alt="" />
+        {role == "user" ? (
+          <img src="/learn.png" alt="" />
+        ) : (
+          <img src="/teach.png" alt="" />
+        )}
       </div>
       <div className="w-full max-w-md bg-white p-8 rounded-lg ">
         <h2 className="text-3xl font-semibold text-center mb-8">
@@ -72,12 +93,10 @@ const Login = () => {
           >
             Log in
           </button>
+          {error.length > 0 && <span>{error}</span>}
         </form>
         <p className="mt-6 text-center text-sm text-gray-500">
-          Don't have an account?{" "}
-          <a href="/register" className="text-purple-600 hover:underline">
-            Sign up
-          </a>
+          Don't have an account? <Link to={`/register/${role}`}>Sign up</Link>
         </p>
       </div>
     </div>
