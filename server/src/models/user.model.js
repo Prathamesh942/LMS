@@ -10,7 +10,7 @@ const UserSchema = new Schema({
   },
   email: String,
   password: String,
-  role: String,
+  role: { type: String, enum: ["user", "admin"], default: "user" },
 });
 
 UserSchema.pre("save", async function (next) {
